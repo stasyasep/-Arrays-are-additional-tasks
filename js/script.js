@@ -51,12 +51,14 @@ let sbu;
 let j = 0;
 
 while(j<users.length){
-	if(users[j].lastIndexOf("ова")>-1||users[j].lastIndexOf("єва")>-1||users[j].lastIndexOf("ка")>-1){
+	let res = users[j].slice(-3);
+	if(res.lastIndexOf("ова")>-1||res.lastIndexOf("єва")>-1||res.lastIndexOf("ка")>-1){
 		sbu = users[j];
 		break;
 	}
 	j++;
 }
+
 console.log(sbu);
 
 console.groupEnd();
@@ -206,19 +208,18 @@ console.groupCollapsed("Перевірка наявності запчастин
 	let spareParts = ['двигун','маховик','Шатун','поршень','турбіна','колінвал','кронштейн','рокер','балка мотора','шестерні',
 	'трамблер','іммобілайзер','Акамулятор','клема','датчик кисню','тахометр','фара','сигналізація','клаксон','радіатор',
 	'помпа','термостат','дифузор'];
-	for(let i = 0; i<spareParts.length; i++){
-		spareParts[i] = spareParts[i].toLowerCase();
-	}
+	// for(let i = 0; i<spareParts.length; i++){
+	// 	spareParts[i] = spareParts[i].toLowerCase();
+	// }
 
 	let selectedSparePart = 'АКАМУЛЯТОР';
 	selectedSparePart = selectedSparePart.toLowerCase();
-	
-	if(spareParts.includes(selectedSparePart)){
-		console.log("Запчастина є на складі");
-	}
-	else{
-		console.log("Запчастини немає на складі");
-	}
+
+	let availability = spareParts.some(function(e){
+		return e.toLowerCase() === selectedSparePart;
+	});
+
+	console.log( availability ? "Запчастина є на складі": "Запчастини немає на складі");
 
 console.groupEnd(); 
 
@@ -228,7 +229,11 @@ console.groupEnd();
 
 console.groupCollapsed("Посилання на сторінку замовлення запчастини");
 
-	let index = spareParts.indexOf(selectedSparePart);
+	// let index = spareParts.indexOf(selectedSparePart);
+
+	let index = spareParts.findIndex(function(e){
+		return e.toLowerCase() === selectedSparePart;
+	});
 
 	let url = 'http://zapchasti.abc/z'+index;
 	console.log(url);
@@ -286,13 +291,13 @@ console.groupCollapsed("Масив з алфавітом");
 
 	let arr = [];
 	arr.length = 26;
-	arr.fill('a',0,26);
-	let count = arr[0].charCodeAt();
+	arr.fill('a');
+	// let count = arr[0].charCodeAt();
 
 	for(let i = 1; i<arr.length;i++){
 		
-		count++;
-		arr[i]=String.fromCharCode(count);
+		// count++;
+		arr[i]=String.fromCharCode(arr[0].charCodeAt()+i);
 
 	}
 
@@ -407,9 +412,15 @@ console.groupEnd();
 
 // 7 заготовок відправилися на обробку (станку потрібно знати їх діаметр).
 
-console.groupCollapsed("7 заготовок, які відправили на обробку");	
-	
-	console.log(workpiece.splice(0, 7));
+console.groupCollapsed("7 заготовок, які відправили на обробку");
+
+	let det = [];
+
+	for(let i = 0; i<7; i++){
+		det[i] = workpiece.shift();
+	};
+
+	console.log(det);	
 
 console.groupEnd();
 
@@ -417,7 +428,7 @@ console.groupEnd();
 // попросив обробити якнайшвидше, але не світити перед начальством, поставити десь їх в глибині склада.
 
 	for(let i = 0; i<6; i++){
-		workpiece.splice(10, 0, getWorkpiece());
+		workpiece.push(getWorkpiece());
 	}
 
 // На склад привезли 3 заготовки з паладія і наказ - їх обробити в першу чергу!
@@ -429,11 +440,15 @@ console.groupEnd();
 // Прийшов токар Вася з візком на 6 деталей, йому кладовщик Грыша розказав про наказ і 
 // про півлітри. Вася за півлітри погодився поточити деталі, але спершу все ж таки взяв паладієві заготовки і ті, що лежали поруч.
 
-	workpiece.splice(0,6);
+	for(let i = 0; i<6; i++){
+		workpiece.shift(getWorkpiece());
+	}
 
 // Через пару годин Вася знову зайшов за заготовками, отримавши у нагороду півлітри.
 
-   workpiece.splice(7,6);
+   for(let i = 0; i<6; i++){
+		workpiece.pop(getWorkpiece());
+	}
    
 
 // Що залишилося на складі?
@@ -485,29 +500,43 @@ console.groupEnd();
 console.groupCollapsed("Масив з кількістю вільних місць на полицях");
 
 	let free = [];
-	for (let i = 0; i<a.length; i++){
-		free[i] = a[i].map(function(e){
-			return 50-e;
+	free = a.map(function(e){
+		return e.map(function(n){
+			return 50-n;
+		})
+	});
+	// for (let i = 0; i<a.length; i++){
+	// 	free[i] = a[i].map(function(e){
+	// 		return 50-e;
 
-		});
-	}
+	// 	});
+	// }
 	console.log(free);
 
 console.groupEnd();
 
 console.groupCollapsed("Чи є порожні полиці?");
 
-	for (let i = 0; i<a.length; i++){
-		let res = a[i].includes(0);
+	let empty = a.some(function(e){
+		return e.some(function(n){
+			return n===0;
+		})
+	});
 
-		if(res){
-			console.log('Є порожні полиці');
-			break;
-		}
-		if(i===a.length-1&&!res){
-			console.log('Немає порожніх полиць');
-		}
-	}
+	console.log( empty ? 'Є порожні полиці': 'Немає порожніх полиць');
+
+
+	// for (let i = 0; i<a.length; i++){
+	// 	let res = a[i].includes(0);
+
+	// 	if(res){
+	// 		console.log('Є порожні полиці');
+	// 		break;
+	// 	}
+	// 	if(i===a.length-1&&!res){
+	// 		console.log('Немає порожніх полиць');
+	// 	}
+	// }
 
 console.groupEnd();
 
@@ -519,7 +548,7 @@ console.groupCollapsed("Чи на всіх полицях не менше дво
 		});
 	});
 
-	evr ? console.log('На всіх полицях не менше двох листів') : console.log('Є полиці де менше 2 листів');
+	console.log( evr ? 'На всіх полицях не менше двох листів': 'Є полиці де менше 2 листів');
 
 console.groupEnd();
 	
